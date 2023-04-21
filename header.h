@@ -79,6 +79,41 @@ void display_inventory_item()
     fclose(fp);
 }
 
+void search_in_inventory()
+{
+    inventoryItem inventory;
+
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb+");
+
+    if (fp == NULL)
+    {
+        printf("\n\t\t\t\tSearch inventory file is not open");
+    }
+
+    int skuNum, flag = 0;
+    printf("Enter sku number of that item you want to search: ");
+    scanf("%d", &skuNum);
+
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0 && flag == 0)
+    {
+        if (inventory.sku_num == skuNum)
+        {
+            printf("\n\t\t\t\t\tSuccessfully data found\n");
+            printf("\n\t\t\tItem name\tSKU Number\tCost of each\t\tQuantity\n");
+            flag = 1;
+            printf("\t\t\t%s \t\t %d \t\t %.2f \t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
+        }
+    }
+
+    if (flag == 0)
+    {
+        printf("\n\t\t\t\t\tSku number (%d) data is not found.\n", skuNum);
+    }
+
+    fclose(fp);
+}
+
 void update_inventory_item()
 {
     inventoryItem inventory;
@@ -134,37 +169,3 @@ void update_inventory_item()
     fclose(fp);
 }
 
-void search_in_inventory()
-{
-    inventoryItem inventory;
-
-    FILE *fp;
-    fp = fopen("inventory.txt", "rb+");
-
-    if (fp == NULL)
-    {
-        printf("\n\t\t\t\tSearch inventory file is not open");
-    }
-
-    int skuNum, flag = 0;
-    printf("Enter sku number of that item you want to search: ");
-    scanf("%d", &skuNum);
-
-    while (fread(&inventory, sizeof(inventory), 1, fp) > 0 && flag == 0)
-    {
-        if (inventory.sku_num == skuNum)
-        {
-            printf("\n\t\t\t\t\tSuccessfully data found\n");
-            printf("\n\t\t\tItem name\tSKU Number\tCost of each\t\tQuantity\n");
-            flag = 1;
-            printf("\t\t\t%s \t\t %d \t\t %.2f \t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
-        }
-    }
-
-    if (flag == 0)
-    {
-        printf("\n\t\t\t\t\tSku number (%d) data is not found.\n", skuNum);
-    }
-
-    fclose(fp);
-}
