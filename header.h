@@ -169,3 +169,74 @@ void update_inventory_item()
     fclose(fp);
 }
 
+void delete_inventory_item()
+{
+    inventoryItem inventory;
+
+    FILE *fp, *f_temp;
+    fp = fopen("inventory.txt", "rb");
+    f_temp = fopen("inventory_copy.txt","ab+");
+    
+    if (fp == NULL || f_temp == NULL)
+    {
+        printf("\n\t\t\t\tDelete file is not open.\n");
+    }
+
+    int skuNUmber, flag = 0;
+    printf("\nEnter sku number of that item you want to delete: ");
+    scanf("%d", &skuNUmber);
+
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    {
+        if (inventory.sku_num == skuNUmber)
+        {
+            flag = 1;
+            printf("\n\t\t\t\tItem successfully deleted");
+        }
+
+        else
+        {
+            fwrite (&inventory, sizeof(inventory), 1, f_temp);
+        }
+    }
+
+    if (flag == 0)
+    {
+        printf("\n\t\t\t\tNo search data found.");
+    }
+
+    fclose(fp);
+    fclose(f_temp);
+
+    remove("inventory.txt");
+    rename("inventory_copy.txt", "inventory.txt");
+
+    
+    /*
+        user(4) == inventory(4)
+
+        box1(m)        box2(T) --> main
+        4           3
+        3           2
+        2           1
+        1
+
+        swap
+        temp = n1
+        n1 = n2
+        n2 = n1
+
+        delete
+
+        *fp     *temp
+        *fp == user
+
+        others --> *temp
+
+        a   1
+2       b   2  
+        c   3
+        d   4
+
+    */
+}

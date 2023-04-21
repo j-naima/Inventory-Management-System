@@ -6,7 +6,7 @@ void main()
 {
     int choice;
 
-    printf("\n\t\t\t\t :Hi! Welcome to inventory management system: \n");
+    printf("\n\t\t\t\t Hi! Welcome to inventory management system \n");
 
     while (1)
     {
@@ -41,7 +41,7 @@ void main()
             break;
             
         case 5:
-            //delete_inventory_item();
+            delete_inventory_item();
             break;
             
         case 6:
@@ -53,7 +53,7 @@ void main()
             break;
 
         case 8:
-            printf("Goodbye see you again 😊");
+            printf("Goodbye see you again..!");
             exit(0);
 
         default:
