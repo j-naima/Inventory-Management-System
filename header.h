@@ -211,32 +211,99 @@ void delete_inventory_item()
     remove("inventory.txt");
     rename("inventory_copy.txt", "inventory.txt");
 
-    
-    /*
-        user(4) == inventory(4)
-
-        box1(m)        box2(T) --> main
-        4           3
-        3           2
-        2           1
-        1
-
-        swap
-        temp = n1
-        n1 = n2
-        n2 = n1
-
-        delete
-
-        *fp     *temp
-        *fp == user
-
-        others --> *temp
-
-        a   1
-2       b   2  
-        c   3
-        d   4
-
-    */
 }
+
+void checkInventory_and_add_quantity()
+{
+    inventoryItem inventory;
+    
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb+");
+
+    if (fp == NULL)
+    {
+        printf("\n\t\t\t\tRestock inventory file is not open.\n");
+    }
+
+    int min_quantity;
+    printf("Enter minimum quantity: ");
+    scanf("%d", &min_quantity); // 5
+
+    int restock_inventory;
+    printf("\nEnter restock quantity: ");
+    scanf("%d", &restock_inventory);
+
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    {
+        // rice     1    34.53      4 
+        // shampo   2    10.23      3
+        // makeup   3    15.46      7
+        
+       if (inventory.quantity < min_quantity)
+       {
+            inventory.quantity += restock_inventory;
+
+            fseek(fp, -(long)sizeof(inventory), SEEK_CUR); //
+            fwrite(&inventory, sizeof(inventory), 1, fp);
+
+            fflush(fp);
+       }
+    }
+
+    printf("\n\t\t\t\tInventory successfully restocked.\n");
+
+    fclose(fp);
+}
+ 
+ void purchase_item()
+
+ {
+    inventoryItem inventory;
+    
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb+");
+
+    if(fp == NULL)
+    {
+        printf("\n\t\t\t\tPurchase file is not open");
+    }
+    
+    int skuNum, buy_quantity, flag = 0; 
+    
+    printf("\nEnter sku number of the item you want to buy: ");
+    scanf("%d", &skuNum);
+
+    printf("\nEnter number of quantity you want to buy: ");
+    scanf("%d", &buy_quantity);
+
+    while(fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    {
+        if (inventory.sku_num == skuNum)
+        {
+            flag = 1;
+
+            if (inventory.quantity >= buy_quantity)
+            {
+                inventory.quantity -= buy_quantity;
+
+                fseek(fp, -(long)sizeof(inventory), 1);
+                fwrite(&inventory, sizeof(inventory), 1, fp);
+
+                printf("\n\t\t\t\tSuccessfully buy item.\n");
+                break;
+            }
+
+            else
+            {
+                printf("\n\t\t\t\tSorry there is not enough quantity in stock. \n");
+            }
+        }
+    }
+
+    if (flag == 0)
+    {
+        printf("\n\n\t\t\t\tItem information not found.\n");
+    }
+
+    fclose(fp);
+ }

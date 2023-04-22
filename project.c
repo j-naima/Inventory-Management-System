@@ -45,11 +45,11 @@ void main()
             break;
             
         case 6:
-            //checkInventory_and_add_quantity();
+            checkInventory_and_add_quantity();
             break;
 
         case 7:
-            //purchase_item();
+            purchase_item();
             break;
 
         case 8:
