@@ -100,9 +100,9 @@ void search_in_inventory()
         if (inventory.sku_num == skuNum)
         {
             printf("\n\t\t\t\t\tSuccessfully data found\n");
-            printf("\n\t\t\tItem name\tSKU Number\tCost of each\t\tQuantity\n");
+            printf("\n\t\t\t\tItem name\t\tSKU Number\t\tCost of each\t\t\tQuantity\n");
             flag = 1;
-            printf("\t\t\t%s \t\t %d \t\t %.2f \t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
+            printf("\t\t\t\t%s \t\t\t %d \t\t\t %.2f \t\t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
         }
     }
 
