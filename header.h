@@ -6,6 +6,32 @@ typedef struct
     int quantity;
 } inventoryItem;
 
+void display_inventory_item()
+{
+    inventoryItem inventory;
+
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb");
+
+    if (fp == NULL)
+    {
+        printf("\n\t\t\t\tDisplay file is not open\n");
+    }
+
+    printf("\n\t\t\t\tHere is all item that are available in inventory: \n");
+
+    printf("\n\t\t\t  Item name\t\tSKU Number\t  Cost of each\t\tQuantity\n");
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    {
+        printf("\t\t\t%8s", inventory.name);
+        printf("\t\t%7d", inventory.sku_num);
+        printf("\t\t  %10.2f", inventory.cost);
+        printf("\t\t  %4d\n", inventory.quantity);
+    }
+
+    fclose(fp);
+}
+
 void insert_item_in_inventory()
 {
     inventoryItem inventory;
@@ -54,64 +80,52 @@ void insert_item_in_inventory()
     }
 
     fclose(fp);
+    display_inventory_item();
 }
 
-void display_inventory_item()
+void delete_inventory_item()
 {
     inventoryItem inventory;
 
-    FILE *fp;
+    FILE *fp, *f_temp;
     fp = fopen("inventory.txt", "rb");
+    f_temp = fopen("inventory_copy.txt", "ab+");
 
-    if (fp == NULL)
+    if (fp == NULL || f_temp == NULL)
     {
-        printf("\n\t\t\t\tDisplay file is not open\n");
+        printf("\n\t\t\t\tDelete file is not open\n");
     }
 
-    printf("\n\t\t\t\tHere is all item that are available in inventory: \n");
+    int skuNumber, flag = 0;
+    printf("\nEnter sku number of the item you want to delete: ");
+    scanf("%d", &skuNumber);
 
-    printf("\n\t\t\tItem name\tSKU Number\tCost of each\t\tQuantity\n");
     while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
     {
-        printf("\t\t\t%s \t\t %d \t\t %.2f \t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
-    }
-
-    fclose(fp);
-}
-
-void search_in_inventory()
-{
-    inventoryItem inventory;
-
-    FILE *fp;
-    fp = fopen("inventory.txt", "rb+");
-
-    if (fp == NULL)
-    {
-        printf("\n\t\t\t\tSearch inventory file is not open");
-    }
-
-    int skuNum, flag = 0;
-    printf("Enter sku number of that item you want to search: ");
-    scanf("%d", &skuNum);
-
-    while (fread(&inventory, sizeof(inventory), 1, fp) > 0 && flag == 0)
-    {
-        if (inventory.sku_num == skuNum)
+        if (inventory.sku_num == skuNumber)
         {
-            printf("\n\t\t\t\t\tSuccessfully data found\n");
-            printf("\n\t\t\t\tItem name\t\tSKU Number\t\tCost of each\t\t\tQuantity\n");
             flag = 1;
-            printf("\t\t\t\t%s \t\t\t %d \t\t\t %.2f \t\t\t\t %d\n", inventory.name, inventory.sku_num, inventory.cost, inventory.quantity);
+            printf("\n\t\t\t\tInventory item successfully deleted\n");
+        }
+
+        else
+        {
+            fwrite(&inventory, sizeof(inventory), 1, f_temp);
         }
     }
 
     if (flag == 0)
     {
-        printf("\n\t\t\t\t\tSku number (%d) data is not found.\n", skuNum);
+        printf("\n\t\t\t\tNo search data found.\n");
     }
 
     fclose(fp);
+    fclose(f_temp);
+
+    remove("inventory.txt");
+    rename("inventory_copy.txt", "inventory.txt");
+    
+    display_inventory_item(); 
 }
 
 void update_inventory_item()
@@ -167,116 +181,31 @@ void update_inventory_item()
     }
 
     fclose(fp);
+    
+    display_inventory_item(); 
 }
 
-void delete_inventory_item()
+void purchase_item()
 {
     inventoryItem inventory;
 
-    FILE *fp, *f_temp;
-    fp = fopen("inventory.txt", "rb");
-    f_temp = fopen("inventory_copy.txt","ab+");
-    
-    if (fp == NULL || f_temp == NULL)
-    {
-        printf("\n\t\t\t\tDelete file is not open.\n");
-    }
-
-    int skuNUmber, flag = 0;
-    printf("\nEnter sku number of that item you want to delete: ");
-    scanf("%d", &skuNUmber);
-
-    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
-    {
-        if (inventory.sku_num == skuNUmber)
-        {
-            flag = 1;
-            printf("\n\t\t\t\tItem successfully deleted");
-        }
-
-        else
-        {
-            fwrite (&inventory, sizeof(inventory), 1, f_temp);
-        }
-    }
-
-    if (flag == 0)
-    {
-        printf("\n\t\t\t\tNo search data found.");
-    }
-
-    fclose(fp);
-    fclose(f_temp);
-
-    remove("inventory.txt");
-    rename("inventory_copy.txt", "inventory.txt");
-
-}
-
-void checkInventory_and_add_quantity()
-{
-    inventoryItem inventory;
-    
     FILE *fp;
     fp = fopen("inventory.txt", "rb+");
 
     if (fp == NULL)
     {
-        printf("\n\t\t\t\tRestock inventory file is not open.\n");
+        printf("\n\t\t\t\tPurchase file is not open\n");
     }
 
-    int min_quantity;
-    printf("Enter minimum quantity: ");
-    scanf("%d", &min_quantity); // 5
+    int skuNum, buy_quantity, flag = 0;
 
-    int restock_inventory;
-    printf("\nEnter restock quantity: ");
-    scanf("%d", &restock_inventory);
-
-    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
-    {
-        // rice     1    34.53      4 
-        // shampo   2    10.23      3
-        // makeup   3    15.46      7
-        
-       if (inventory.quantity < min_quantity)
-       {
-            inventory.quantity += restock_inventory;
-
-            fseek(fp, -(long)sizeof(inventory), SEEK_CUR); //
-            fwrite(&inventory, sizeof(inventory), 1, fp);
-
-            fflush(fp);
-       }
-    }
-
-    printf("\n\t\t\t\tInventory successfully restocked.\n");
-
-    fclose(fp);
-}
- 
- void purchase_item()
-
- {
-    inventoryItem inventory;
-    
-    FILE *fp;
-    fp = fopen("inventory.txt", "rb+");
-
-    if(fp == NULL)
-    {
-        printf("\n\t\t\t\tPurchase file is not open");
-    }
-    
-    int skuNum, buy_quantity, flag = 0; 
-    
     printf("\nEnter sku number of the item you want to buy: ");
     scanf("%d", &skuNum);
 
     printf("\nEnter number of quantity you want to buy: ");
     scanf("%d", &buy_quantity);
 
-    while(fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
     {
         if (inventory.sku_num == skuNum)
         {
@@ -289,21 +218,102 @@ void checkInventory_and_add_quantity()
                 fseek(fp, -(long)sizeof(inventory), 1);
                 fwrite(&inventory, sizeof(inventory), 1, fp);
 
-                printf("\n\t\t\t\tSuccessfully buy item.\n");
+                printf("\n\t\t\t\tSuccessfully buy item\n");
                 break;
             }
 
             else
             {
-                printf("\n\t\t\t\tSorry there is not enough quantity in stock. \n");
+                printf("\n\t\t\t\tSorry there is not enough quantity in stock.\n");
             }
         }
     }
 
     if (flag == 0)
     {
-        printf("\n\n\t\t\t\tItem information not found.\n");
+        printf("\n \n \t\t\t\tItem information not found\n");
     }
 
     fclose(fp);
- }
+
+    display_inventory_item(); 
+}
+
+void checkInventory_and_add_quantity()
+{
+    inventoryItem inventory;
+
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb+");
+
+    if (fp == NULL)
+    {
+        printf("\n\t\t\t\tRestock inventory file is not open");
+    }
+
+    int min_quantity;
+    printf("Enter minimum amount: ");
+    scanf("%d", &min_quantity);
+
+    int restock_quantity;
+    printf("Enter restock quantity: ");
+    scanf("%d", &restock_quantity);
+
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0)
+    {
+        if (inventory.quantity < min_quantity)
+        {
+            inventory.quantity += restock_quantity;
+
+            fseek(fp, -(long)sizeof(inventory), SEEK_CUR);
+            fwrite(&inventory, sizeof(inventory), 1, fp);
+
+            fflush(fp);
+        }
+    }
+
+    printf("\n\n\t\t\t\tInventory successfully restocked");
+    fclose(fp);
+    
+    display_inventory_item(); 
+}
+
+void search_in_inventory()
+{
+    inventoryItem inventory;
+
+    FILE *fp;
+    fp = fopen("inventory.txt", "rb+");
+
+    if (fp == NULL)
+    {
+        printf("\n\t\t\t\tSearch inventory file is not open");
+    }
+
+    int skuNum, flag = 0;
+    printf("Enter sku number of that item you want to search: ");
+    scanf("%d", &skuNum);
+
+    while (fread(&inventory, sizeof(inventory), 1, fp) > 0 && flag == 0)
+    {
+        if (inventory.sku_num == skuNum)
+        {
+            flag = 1;
+
+            printf("\n\t\t\t\t\tSuccessfully data found\n");
+            printf("\n\t\t\tItem name\t\tSKU Number\t  Cost of each\t\tQuantity\n");
+
+            printf("\t\t\t%8s", inventory.name);
+            printf("\t\t%7d", inventory.sku_num);
+            printf("\t\t  %10.2f", inventory.cost);
+            printf("\t\t  %4d\n", inventory.quantity);
+        }
+    }
+
+    if (flag == 0)
+    {
+        printf("\n\t\t\t\t\tSku number (%d) data is not found.\n", skuNum);
+    }
+
+    fclose(fp);
+}
